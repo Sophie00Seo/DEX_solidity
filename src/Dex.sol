@@ -3,9 +3,6 @@ pragma solidity ^0.8.13;
 
 import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
-// overflow check !!!!!
-// approve check !!!!!
-
 contract Dex is ERC20 {
     address _addrX;
     address _addrY;
@@ -15,7 +12,7 @@ contract Dex is ERC20 {
     ERC20 _tokenY;
 
     uint _decimal;
-    // Token Decimal이 바뀌지 않아서 생략
+    // might need this if both Token Decimals are not 18
     // uint _decimalX;
     // uint _decimalY;
 
@@ -35,7 +32,6 @@ contract Dex is ERC20 {
         
         uint256 amount_;
         if(tokenXAmount > 0){
-            // amount_ = _amountY - _amountX * _amountY / (_amountX + tokenXAmount * 999 / 1000); // decimal??
             amount_ = _amountY * (tokenXAmount * 999 / 1000) / (_amountX + (tokenXAmount * 999 / 1000));
             
             require(amount_ >= tokenMinimumOutputAmount, "less than minimum swap amount");
@@ -45,7 +41,6 @@ contract Dex is ERC20 {
             _tokenY.transfer(msg.sender, amount_ );
         }
         else{
-            // amount_ = _amountX - _amountX * _amountY / (_amountY + tokenYAmount * 999 / 1000);
             amount_ = _amountX * (tokenYAmount * 999 / 1000) / (_amountY + (tokenYAmount * 999 / 1000));
 
             require(amount_ >= tokenMinimumOutputAmount, "less than minimum swap amount");
@@ -69,7 +64,7 @@ contract Dex is ERC20 {
         // what if _amountX/_amountY and tokenXAmount/tokenYAmount is different?
         uint lpAmount;
         if(totalSupply() == 0){
-            lpAmount = tokenXAmount * tokenYAmount / _decimal; // is amount best?
+            lpAmount = tokenXAmount * tokenYAmount / _decimal; // is amount best? no overflow?
         }
         else{
             lpAmount = totalSupply() * tokenXAmount / _amountX;
@@ -108,7 +103,7 @@ contract Dex is ERC20 {
         return true;
     }
 
-    function updateTokenBalance() internal {
+    function updateTokenBalance() internal { // might be donated tokens
         _amountX = _tokenX.balanceOf(address(this));
         _amountY = _tokenY.balanceOf(address(this));
     }
