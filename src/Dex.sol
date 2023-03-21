@@ -67,6 +67,7 @@ contract Dex is ERC20 {
             lpAmount = tokenXAmount * tokenYAmount / _decimal; // is amount best? no overflow?
         }
         else{
+            require(_decimal * tokenXAmount / tokenYAmount == _decimal * _amountX / _amountY, "amount breaks the pool ratio");
             lpAmount = totalSupply() * tokenXAmount / _amountX;
         }
         require(lpAmount >= minimumLPTokenAmount, "less than minimum lp token amount");
